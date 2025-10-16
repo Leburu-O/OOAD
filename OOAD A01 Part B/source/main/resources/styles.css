@@ -1,0 +1,89 @@
+/* styles.css - Fully Compatible JavaFX CSS */
+.root {
+    -fx-background-color: #F5F5F5; /* Light Grey Background */
+}
+
+.label, .text {
+    -fx-text-fill: #263238; /* Charcoal Text */
+    -fx-font-size: 14px;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.text-field, .password-field, .combo-box {
+    -fx-background-color: white;
+    -fx-border-color: #CCCCCC;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 10;
+    -fx-pref-height: 35;
+    -fx-font-size: 14px;
+    -fx-text-fill: #263238;
+}
+
+/* Button Styling */
+.button {
+    -fx-background-color: #008080; /* Teal */
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 2);
+}
+
+.button:hover {
+    -fx-background-color: #006666;
+}
+
+.button:pressed {
+    -fx-background-color: #004c4c;
+}
+
+/* Success Alert (e.g., deposit confirmation) */
+.alert-success .content {
+    -fx-background-color: #228B22; /* Forest Green */
+}
+.alert-success .header-panel,
+.alert-success .label {
+    -fx-text-fill: white;
+}
+
+/* Error/Warning Alert (e.g., invalid withdrawal) */
+.alert-warning .content,
+.alert-error .content {
+    -fx-background-color: #FF6B6B; /* Soft Red */
+}
+.alert-warning .header-panel,
+.alert-warning .label,
+.alert-error .label {
+    -fx-text-fill: #263238; /* Charcoal — ensures readable contrast */
+}
+
+/* Header Panel: Navy Blue Accent Bar */
+.header-panel {
+    -fx-background-color: #003366; /* Navy Blue */
+    -fx-text-fill: white;
+    -fx-padding: 10;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+/* ListView Styling */
+.list-view {
+    -fx-background-color: transparent;
+    -fx-padding: 5;
+}
+.list-view .list-cell {
+    -fx-padding: 8;
+}
+.list-view .list-cell:odd {
+    -fx-background-color: transparent;
+}
+.list-view .list-cell:even {
+    -fx-background-color: derive(#F5F5F5, 90%);
+}
+.list-view .list-cell:selected {
+    -fx-background-color: #008080;
+    -fx-text-fill: white;
+}
