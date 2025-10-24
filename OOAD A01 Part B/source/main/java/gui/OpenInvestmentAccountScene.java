@@ -1,6 +1,7 @@
 // gui/OpenInvestmentAccountScene.java
 package gui;
 
+import controllers.OpenInvestmentAccountController;
 import entities.Customer;
 import services.BankTeller;
 import javafx.scene.Scene;
@@ -17,16 +18,13 @@ import java.util.List;
 public class OpenInvestmentAccountScene {
     private Stage stage = new Stage();
     private List<Customer> customers;
-    private BankTeller bankTeller;
+    private OpenInvestmentAccountController controller;
 
     public OpenInvestmentAccountScene(List<Customer> customers, BankTeller bankTeller) {
         this.customers = customers;
-        this.bankTeller = bankTeller;
+        this.controller = new OpenInvestmentAccountController(bankTeller);
     }
 
-    /**
-     * Displays the form to open an Investment Account.
-     */
     public void show() {
         VBox root = new VBox(15);
         root.setPadding(new javafx.geometry.Insets(20));
@@ -62,14 +60,7 @@ public class OpenInvestmentAccountScene {
 
             try {
                 double deposit = Double.parseDouble(depositStr);
-                if (deposit < 500.0) {
-                    showAlert("Invalid Deposit", "Investment account requires minimum deposit of BWP 500.00.", true);
-                    return;
-                }
-
-                // Open account via teller
-                bankTeller.openInvestmentAccount("Main Branch", customer, deposit);
-                customer.addAccount(customer.getAccounts().get(customer.getAccounts().size() - 1));
+                controller.openAccount("Main Branch", customer, deposit);
                 showAlert("Success", "Investment account opened successfully!", false);
                 clearForm(accNumField, depositField);
             } catch (NumberFormatException ex) {

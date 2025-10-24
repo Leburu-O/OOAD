@@ -1,6 +1,7 @@
 // gui/CustomerLoginScene.java
 package gui;
 
+import controllers.CustomerLoginController;
 import entities.Customer;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -13,10 +14,12 @@ public class CustomerLoginScene {
     private Stage stage;
     private List<Customer> customers;
     private CustomerDashboardScene dashboard;
+    private CustomerLoginController loginController;
 
     public CustomerLoginScene(List<Customer> customers, CustomerDashboardScene dashboard) {
         this.customers = customers;
         this.dashboard = dashboard;
+        this.loginController = new CustomerLoginController(customers);
         this.stage = new Stage();
         createUI();
     }
@@ -27,8 +30,6 @@ public class CustomerLoginScene {
 
         Label titleLabel = new Label("Customer Login");
         titleLabel.getStyleClass().add("header-panel");
-        titleLabel.setMinWidth(300);
-        titleLabel.setAlignment(javafx.geometry.Pos.CENTER);
 
         TextField accNumField = new TextField();
         accNumField.setPromptText("Account Number");
@@ -46,8 +47,8 @@ public class CustomerLoginScene {
                 return;
             }
 
-            Customer customer = findCustomer(accNum);
-            if (customer != null && customer.authenticate(accNum, pin)) {
+            Customer customer = loginController.login(accNum, pin);
+            if (customer != null) {
                 dashboard.setCustomer(customer);
                 stage.hide();
                 dashboard.show();
@@ -68,13 +69,6 @@ public class CustomerLoginScene {
         Scene scene = new Scene(layout, 350, 300);
         scene.getStylesheets().add("/styles.css");
         stage.setScene(scene);
-    }
-
-    private Customer findCustomer(String accNum) {
-        return customers.stream()
-                .filter(c -> c.getAccountNumber().equals(accNum))
-                .findFirst()
-                .orElse(null);
     }
 
     private void showAlert(String title, String message, boolean isError) {

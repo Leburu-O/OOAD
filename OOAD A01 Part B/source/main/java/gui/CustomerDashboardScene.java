@@ -1,6 +1,7 @@
 // gui/CustomerDashboardScene.java
 package gui;
 
+import controllers.TransactionController;
 import entities.Account;
 import entities.Transaction;
 import javafx.collections.FXCollections;
@@ -9,23 +10,19 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
-import java.util.List;
-
 public class CustomerDashboardScene {
     private Stage stage = new Stage();
     private ComboBox<Account> accountCombo;
     private ListView<String> historyView;
-    private entities.Customer customer;
+    private TransactionController txController;
 
     public void setCustomer(entities.Customer customer) {
-        this.customer = customer;
+        this.txController = new TransactionController(customer);
         BorderPane root = new BorderPane();
         root.getStyleClass().add("root");
 
         Label welcomeLabel = new Label("Welcome, " + customer.getFirstName() + " " + customer.getSurname());
         welcomeLabel.getStyleClass().add("header-panel");
-        welcomeLabel.setMinWidth(Region.USE_PREF_SIZE);
-
         HBox topBar = new HBox(welcomeLabel);
         topBar.setStyle("-fx-background-color: #003366;");
         root.setTop(topBar);
@@ -40,7 +37,7 @@ public class CustomerDashboardScene {
         );
 
         accountCombo = new ComboBox<>();
-        accountCombo.setItems(FXCollections.observableArrayList(customer.getAccounts()));
+        accountCombo.setItems(FXCollections.observableArrayList(txController.getAccounts()));
         accountCombo.getSelectionModel().selectFirst();
         left.getChildren().add(accountCombo);
 
@@ -82,14 +79,10 @@ public class CustomerDashboardScene {
         Account selected = accountCombo.getValue();
         if (selected == null) return;
 
-        if (!isDeposit && selected.getClass().getSimpleName().contains("Savings")) {
-            showAlert("Restricted", "Withdrawal not allowed from Savings Account.", true);
-            return;
-        }
-
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle(isDeposit ? "Deposit Funds" : "Withdraw Funds");
         dialog.setHeaderText("Enter amount in BWP:");
+
         dialog.showAndWait().ifPresent(amountStr -> {
             try {
                 double amount = Double.parseDouble(amountStr.trim());
@@ -97,17 +90,20 @@ public class CustomerDashboardScene {
                     showAlert("Invalid", "Amount must be positive.", true);
                     return;
                 }
-                if (isDeposit) selected.deposit(amount);
-                else selected.withdraw(amount);
+                if (isDeposit) {
+                    txController.deposit(selected, amount);
+                } else {
+                    txController.withdraw(selected, amount);
+                }
                 refreshHistory();
-            } catch (Exception ex) {
-                showAlert("Error", "Invalid amount format.", true);
+            } catch (IllegalArgumentException | IllegalStateException ex) {
+                showAlert("Error", ex.getMessage(), true);
             }
         });
     }
 
     private void openHistoryViewer() {
-        new TransactionHistoryViewer(customer, accountCombo.getValue()).show();
+        new TransactionHistoryViewer(txController, accountCombo.getValue()).show();
     }
 
     private void confirmLogout() {
@@ -126,11 +122,8 @@ public class CustomerDashboardScene {
     private void refreshHistory() {
         Account selected = accountCombo.getValue();
         if (selected == null) return;
-        List<Transaction> history = selected.getTransactionHistory();
         historyView.getItems().clear();
-        for (Transaction t : history) {
-            historyView.getItems().add(t.toString());
-        }
+        selected.getTransactionHistory().forEach(t -> historyView.getItems().add(t.toString()));
     }
 
     private void showAlert(String title, String message, boolean isError) {

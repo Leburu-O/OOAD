@@ -1,6 +1,7 @@
 // gui/OpenSavingsAccountScene.java
 package gui;
 
+import controllers.OpenSavingsAccountController;
 import entities.Customer;
 import services.BankTeller;
 import javafx.scene.Scene;
@@ -13,11 +14,11 @@ import java.util.List;
 public class OpenSavingsAccountScene {
     private Stage stage = new Stage();
     private List<Customer> customers;
-    private BankTeller bankTeller;
+    private OpenSavingsAccountController controller;
 
     public OpenSavingsAccountScene(List<Customer> customers, BankTeller bankTeller) {
         this.customers = customers;
-        this.bankTeller = bankTeller;
+        this.controller = new OpenSavingsAccountController(bankTeller);
     }
 
     public void show() {
@@ -48,9 +49,13 @@ public class OpenSavingsAccountScene {
                 return;
             }
             boolean isCompany = company.isSelected();
-            bankTeller.openSavingsAccount("Main Branch", c, isCompany);
-            c.addAccount(c.getAccounts().get(c.getAccounts().size() - 1));
-            showAlert("Success", "Savings account opened successfully!", false);
+            try {
+                controller.openAccount("Main Branch", c, isCompany);
+                showAlert("Success", "Savings account opened successfully!", false);
+                clearForm(accNumField);
+            } catch (Exception ex) {
+                showAlert("Error", ex.getMessage(), true);
+            }
         });
 
         root.getChildren().addAll(title, new Label("Customer Account #:"), accNumField, typeBox, openBtn);
@@ -64,6 +69,10 @@ public class OpenSavingsAccountScene {
 
     private Customer findCustomer(String accNum) {
         return customers.stream().filter(c -> c.getAccountNumber().equals(accNum)).findFirst().orElse(null);
+    }
+
+    private void clearForm(TextField... fields) {
+        for (TextField f : fields) f.clear();
     }
 
     private void showAlert(String title, String message, boolean isError) {

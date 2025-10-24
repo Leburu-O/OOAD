@@ -1,6 +1,7 @@
 // gui/OpenChequeAccountScene.java
 package gui;
 
+import controllers.OpenChequeAccountController;
 import entities.Customer;
 import services.BankTeller;
 import javafx.scene.Scene;
@@ -17,16 +18,13 @@ import java.util.List;
 public class OpenChequeAccountScene {
     private Stage stage = new Stage();
     private List<Customer> customers;
-    private BankTeller bankTeller;
+    private OpenChequeAccountController controller;
 
     public OpenChequeAccountScene(List<Customer> customers, BankTeller bankTeller) {
         this.customers = customers;
-        this.bankTeller = bankTeller;
+        this.controller = new OpenChequeAccountController(bankTeller);
     }
 
-    /**
-     * Displays the form to open a Cheque Account.
-     */
     public void show() {
         VBox root = new VBox(15);
         root.setPadding(new javafx.geometry.Insets(20));
@@ -65,9 +63,7 @@ public class OpenChequeAccountScene {
             }
 
             try {
-                // Open account via teller
-                bankTeller.openChequeAccount("Main Branch", customer, employer, address);
-                customer.addAccount(customer.getAccounts().get(customer.getAccounts().size() - 1));
+                controller.openAccount("Main Branch", customer, employer, address);
                 showAlert("Success", "Cheque account opened successfully!", false);
                 clearForm(accNumField, employerField, addressField);
             } catch (Exception ex) {

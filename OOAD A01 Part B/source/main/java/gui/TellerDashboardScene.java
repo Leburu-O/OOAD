@@ -13,7 +13,9 @@ public class TellerDashboardScene {
     private OpenInvestmentAccountScene investmentScene;
 
     public TellerDashboardScene(OpenSavingsAccountScene s, OpenChequeAccountScene c, OpenInvestmentAccountScene i) {
-        this.savingsScene = s; this.chequeScene = c; this.investmentScene = i;
+        this.savingsScene = s;
+        this.chequeScene = c;
+        this.investmentScene = i;
     }
 
     public void show() {
