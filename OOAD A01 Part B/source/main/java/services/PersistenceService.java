@@ -3,9 +3,7 @@ package services;
 
 import entities.*;
 import utils.DatabaseManager;
-
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -143,25 +141,25 @@ public class PersistenceService {
     }
 
     private void loadAccountsAndTransactions(List<Customer> customers) {
-        String sql = "SELECT * FROM accounts ORDER BY customerAccountNumber";
-        try (Connection conn = DatabaseManager.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = accountsQuery.executeQuery()) {
+    String sql = "SELECT * FROM accounts ORDER BY customerAccountNumber";
+    try (Connection conn = DatabaseManager.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement(sql);
+         ResultSet rs = pstmt.executeQuery()) {  // ✅ Execute the prepared statement
 
-            while (rs.next()) {
-                String customerAccNum = rs.getString("customerAccountNumber");
-                Customer owner = customerCache.get(customerAccNum);
-                if (owner == null) continue;
+        while (rs.next()) {
+            String customerAccNum = rs.getString("customerAccountNumber");
+            Customer owner = customerCache.get(customerAccNum);
+            if (owner == null) continue;
 
-                Account account = createAccountFromResultSet(rs);
-                owner.addAccount(account);
+            Account account = createAccountFromResultSet(rs);
+            owner.addAccount(account);
 
-                loadTransactionsForAccount(account);
-            }
-        } catch (SQLException e) {
-            System.err.println("Failed to load accounts: " + e.getMessage());
+            loadTransactionsForAccount(account);
         }
+    } catch (SQLException e) {
+        System.err.println("Failed to load accounts: " + e.getMessage());
     }
+}
 
     private Account createAccountFromResultSet(ResultSet rs) throws SQLException {
         String type = rs.getString("type");

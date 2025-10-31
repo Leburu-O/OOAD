@@ -42,4 +42,9 @@ public class Customer {
     public String toString() {
         return String.format("Customer{%s %s | Addr: %s}", firstName, surname, address);
     }
+
+    public String getPIN() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getPIN'");
+    }
 }

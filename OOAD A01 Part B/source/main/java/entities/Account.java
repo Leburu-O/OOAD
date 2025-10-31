@@ -100,7 +100,7 @@ public abstract class Account {
      * Sets the account number (used when loading from database).
      * @param accountNumber Account number to set
      */
-    protected void setAccountNumber(String accountNumber) {
+    public void setAccountNumber(String accountNumber) {
         this.accountNumber = accountNumber;
     }
 
@@ -108,7 +108,7 @@ public abstract class Account {
      * Sets the account balance (used when loading from database).
      * @param balance Balance to set
      */
-    protected void setBalance(double balance) {
+    public void setBalance(double balance) {
         this.balance = balance;
     }
 
