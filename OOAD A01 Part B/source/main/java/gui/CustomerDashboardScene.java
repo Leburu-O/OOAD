@@ -4,7 +4,6 @@ package gui;
 import controllers.HistoryViewController;
 import controllers.TransactionController;
 import entities.Account;
-import entities.Transaction;
 import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -17,7 +16,16 @@ public class CustomerDashboardScene {
     private ListView<String> historyView;
     private TransactionController txController;
 
-    public void setCustomer(entities.Customer customer) {
+    // Reference to login scene for safe navigation
+    private CustomerLoginScene loginScene;
+
+    /**
+     * Sets the current customer and links back to login scene.
+     * @param customer The logged-in customer
+     * @param loginScene Reference to login scene for logout
+     */
+    public void setCustomer(entities.Customer customer, CustomerLoginScene loginScene) {
+        this.loginScene = loginScene;
         this.txController = new TransactionController(customer);
         BorderPane root = new BorderPane();
         root.getStyleClass().add("root");
@@ -120,7 +128,7 @@ public class CustomerDashboardScene {
     }
 
     /**
-     * Confirms logout before closing dashboard.
+     * Confirms logout and returns to login screen safely.
      */
     private void confirmLogout() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -130,7 +138,7 @@ public class CustomerDashboardScene {
         alert.showAndWait().ifPresent(resp -> {
             if (resp == ButtonType.OK) {
                 stage.hide();
-                ((CustomerLoginScene) stage.getOwner()).show();
+                loginScene.show(); // ✅ Safe access — no cast!
             }
         });
     }

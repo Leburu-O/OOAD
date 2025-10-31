@@ -1,7 +1,6 @@
 // gui/CustomerLoginScene.java
 package gui;
 
-import controllers.CustomerLoginController;
 import entities.Customer;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -13,13 +12,11 @@ import java.util.List;
 public class CustomerLoginScene {
     public Stage stage;
     private List<Customer> customers;
-    private CustomerDashboardScene dashboard;
-    private CustomerLoginController loginController;
+    private CustomerDashboardScene dashboardScene;
 
-    public CustomerLoginScene(List<Customer> customers, CustomerDashboardScene dashboard) {
+    public CustomerLoginScene(List<Customer> customers, CustomerDashboardScene dashboardScene) {
         this.customers = customers;
-        this.dashboard = dashboard;
-        this.loginController = new CustomerLoginController(customers);
+        this.dashboardScene = dashboardScene;
         this.stage = new Stage();
         createUI();
     }
@@ -47,11 +44,12 @@ public class CustomerLoginScene {
                 return;
             }
 
-            Customer customer = loginController.login(accNum, pin);
-            if (customer != null) {
-                dashboard.setCustomer(customer);
+            Customer customer = findCustomer(accNum);
+            if (customer != null && customer.authenticate(accNum, pin)) {
+                // ✅ Pass 'this' (login scene) to dashboard for safe logout
+                dashboardScene.setCustomer(customer, this);
                 stage.hide();
-                dashboard.show();
+                dashboardScene.show();
             } else {
                 showAlert("Failed", "Invalid credentials.", true);
             }
@@ -71,6 +69,13 @@ public class CustomerLoginScene {
         stage.setScene(scene);
     }
 
+    private Customer findCustomer(String accNum) {
+        return customers.stream()
+                .filter(c -> c.getAccountNumber().equals(accNum))
+                .findFirst()
+                .orElse(null);
+    }
+
     private void showAlert(String title, String message, boolean isError) {
         Alert alert = new Alert(isError ? Alert.AlertType.ERROR : Alert.AlertType.INFORMATION);
         DialogPane dp = alert.getDialogPane();
@@ -82,6 +87,9 @@ public class CustomerLoginScene {
         alert.showAndWait();
     }
 
+    /**
+     * Displays the login window.
+     */
     public void show() {
         stage.show();
     }

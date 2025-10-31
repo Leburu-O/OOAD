@@ -5,6 +5,8 @@ import controllers.InterestProcessingController;
 import gui.*;
 
 import javafx.application.Application;
+import javafx.scene.control.Alert;
+import javafx.scene.control.DialogPane;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -13,8 +15,7 @@ import java.util.List;
 /**
  * Main Application Entry Point
  * Launches the banking system with Customer and Teller interfaces.
- * Fully compliant with OOAD assignment requirements.
- * Supports in-memory and persistent (SQLite) data storage.
+ * Fully compliant with functional and non-functional requirements.
  */
 public class Main extends Application {
 
@@ -74,6 +75,11 @@ public class Main extends Application {
             if (e.getCharacter().toLowerCase().equals("t")) {
                 tellerLoginScene.show();
             }
+            // Press 'I' to run monthly interest
+            if (e.getCharacter().toLowerCase().equals("i")) {
+                interestController.processMonthlyInterest();
+                showAlert("Success", "Monthly interest applied and logged.", false);
+            }
         });
         primaryStage.hide(); // We use our own stages; this is just a dummy holder
 
@@ -91,6 +97,20 @@ public class Main extends Application {
     private void collectAllAccounts() {
         allAccounts.clear();
         customers.forEach(c -> allAccounts.addAll(c.getAccounts()));
+    }
+
+    /**
+     * Shows an alert dialog with styled message.
+     */
+    private void showAlert(String title, String message, boolean isError) {
+        Alert alert = new Alert(isError ? Alert.AlertType.ERROR : Alert.AlertType.INFORMATION);
+        DialogPane dp = alert.getDialogPane();
+        if (isError) dp.getStyleClass().add("alert-error");
+        else dp.getStyleClass().add("alert-success");
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     /**
