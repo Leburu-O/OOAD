@@ -1,7 +1,6 @@
 // Main.java
 import entities.*;
-import services.BankTeller;
-import services.InterestService;
+import services.*;
 import controllers.InterestProcessingController;
 import gui.*;
 
@@ -14,24 +13,34 @@ import java.util.List;
 /**
  * Main Application Entry Point
  * Launches the banking system with Customer and Teller interfaces.
- * Fully compliant with functional and non-functional requirements.
+ * Fully compliant with OOAD assignment requirements.
+ * Supports in-memory and persistent (SQLite) data storage.
  */
 public class Main extends Application {
 
     private List<Customer> customers = new ArrayList<>();
     private BankTeller bankTeller = new BankTeller();
     private InterestService interestService = new InterestService();
+    private PersistenceService persistenceService = new PersistenceService();
     private List<Account> allAccounts = new ArrayList<>();
 
     @Override
     public void start(Stage primaryStage) {
-        // === Initialize Sample Customers (from interviewee details) ===
-        Customer olerato = new Customer("Olerato", "Leburu", "Gaborone", "ACC100001", "1234");
-        Customer kentsenao = new Customer("Kentsenao", "Baseki", "Francistown", "ACC100002", "5678");
-        customers.add(olerato);
-        customers.add(kentsenao);
+        // === Initialize Database ===
+        utils.DatabaseManager.initialize();
 
-        // Share accounts for monthly interest processing
+        // === Load Existing Data from SQLite (if any) ===
+        customers = persistenceService.loadAllCustomers();
+
+        // If no data exists in DB, create sample customers
+        if (customers.isEmpty()) {
+            Customer olerato = new Customer("Olerato", "Leburu", "Gaborone", "ACC100001", "1234");
+            Customer kentsenao = new Customer("Kentsenao", "Baseki", "Francistown", "ACC100002", "5678");
+            customers.add(olerato);
+            customers.add(kentsenao);
+        }
+
+        // Sync all accounts list for monthly interest processing
         collectAllAccounts();
 
         // === Initialize Controllers ===
@@ -67,6 +76,12 @@ public class Main extends Application {
             }
         });
         primaryStage.hide(); // We use our own stages; this is just a dummy holder
+
+        // === On Close: Save All Data to Database ===
+        primaryStage.setOnCloseRequest(e -> {
+            persistenceService.saveAllCustomers(customers);
+            System.out.println("💾 All customer and account data saved to banking.db");
+        });
     }
 
     /**

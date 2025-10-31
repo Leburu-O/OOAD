@@ -7,7 +7,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class TellerDashboardScene {
-    private Stage stage = new Stage();
+    public Stage stage = new Stage();
     private OpenSavingsAccountScene savingsScene;
     private OpenChequeAccountScene chequeScene;
     private OpenInvestmentAccountScene investmentScene;

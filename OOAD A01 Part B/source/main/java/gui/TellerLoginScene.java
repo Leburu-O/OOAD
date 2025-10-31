@@ -7,7 +7,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class TellerLoginScene {
-    private Stage stage;
+    public Stage stage;
     private TellerDashboardScene tellerDashboard;
 
     public TellerLoginScene(TellerDashboardScene tellerDashboard) {

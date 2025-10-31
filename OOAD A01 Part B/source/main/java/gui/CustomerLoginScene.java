@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 import java.util.List;
 
 public class CustomerLoginScene {
-    private Stage stage;
+    public Stage stage;
     private List<Customer> customers;
     private CustomerDashboardScene dashboard;
     private CustomerLoginController loginController;
