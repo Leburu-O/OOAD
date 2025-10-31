@@ -3,6 +3,7 @@ package controllers;
 
 import entities.Account;
 import entities.Transaction;
+
 import java.util.List;
 
 /**
@@ -45,5 +46,13 @@ public class HistoryViewController {
             sb.append(t.toString()).append("\n");
         }
         return sb.toString();
+    }
+
+    /**
+     * Returns the currently selected account.
+     * @return The account being viewed
+     */
+    public Account getSelectedAccount() {
+        return selectedAccount;
     }
 }
