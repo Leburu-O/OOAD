@@ -10,13 +10,15 @@ import javafx.stage.Stage;
 import java.util.List;
 
 public class CustomerLoginScene {
-    public Stage stage;
-    private List<Customer> customers;
-    private CustomerDashboardScene dashboardScene;
+    public final Stage stage;
+    private final List<Customer> customers;
+    private final CustomerDashboardScene dashboardScene;
+    private final TellerLoginScene tellerLoginScene; // Reference to teller login
 
-    public CustomerLoginScene(List<Customer> customers, CustomerDashboardScene dashboardScene) {
+    public CustomerLoginScene(List<Customer> customers, CustomerDashboardScene dashboardScene, TellerLoginScene tellerLoginScene) {
         this.customers = customers;
         this.dashboardScene = dashboardScene;
+        this.tellerLoginScene = tellerLoginScene;
         this.stage = new Stage();
         createUI();
     }
@@ -46,7 +48,6 @@ public class CustomerLoginScene {
 
             Customer customer = findCustomer(accNum);
             if (customer != null && customer.authenticate(accNum, pin)) {
-                // ✅ Pass 'this' (login scene) to dashboard for safe logout
                 dashboardScene.setCustomer(customer, this);
                 stage.hide();
                 dashboardScene.show();
@@ -55,16 +56,25 @@ public class CustomerLoginScene {
             }
         });
 
+        // 🔘 NEW: Button to open Teller Login
+        Button tellerButton = new Button("🔐 Bank Teller? Click Here");
+        tellerButton.setStyle("-fx-background-color: #003366; -fx-text-fill: white; -fx-font-weight: bold;");
+        tellerButton.setOnAction(e -> {
+            stage.hide();
+            tellerLoginScene.show();
+        });
+
         VBox layout = new VBox(15);
         layout.getChildren().addAll(
                 titleLabel,
                 new Label("Account Number:"), accNumField,
                 new Label("PIN:"), pinField,
-                loginButton
+                loginButton,
+                tellerButton  // ← Added here
         );
         layout.setPadding(new javafx.geometry.Insets(20));
 
-        Scene scene = new Scene(layout, 350, 300);
+        Scene scene = new Scene(layout, 380, 380); // Slightly taller for button
         scene.getStylesheets().add("/styles.css");
         stage.setScene(scene);
     }
@@ -87,9 +97,6 @@ public class CustomerLoginScene {
         alert.showAndWait();
     }
 
-    /**
-     * Displays the login window.
-     */
     public void show() {
         stage.show();
     }
