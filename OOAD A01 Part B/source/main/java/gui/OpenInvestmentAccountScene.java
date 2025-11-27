@@ -8,13 +8,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.scene.layout.Region;
+
 import java.util.List;
 
-/**
- * GUI Scene: Teller opens an Investment Account.
- * Requires minimum initial deposit of BWP500.00.
- */
 public class OpenInvestmentAccountScene {
     private Stage stage = new Stage();
     private List<Customer> customers;
@@ -31,40 +27,53 @@ public class OpenInvestmentAccountScene {
 
         Label title = new Label("Open Investment Account");
         title.getStyleClass().add("header-panel");
-        title.setMinWidth(Region.USE_PREF_SIZE);
-        title.setAlignment(javafx.geometry.Pos.CENTER);
 
-        // Customer lookup
         TextField accNumField = new TextField();
-        accNumField.setPromptText("Customer Account Number");
+        accNumField.setPromptText("Customer Account Number (or New: e.g. ACC100005)");
 
-        // Initial Deposit
         TextField depositField = new TextField();
         depositField.setPromptText("Initial Deposit (Minimum: BWP 500.00)");
+
+        // 🔐 NEW: PIN Field
+        TextField pinField = new TextField();
+        pinField.setPromptText("Set 4-digit PIN for customer");
 
         Button openBtn = new Button("Open Account");
         openBtn.setOnAction(e -> {
             String accNum = accNumField.getText().trim();
             String depositStr = depositField.getText().trim();
+            String pin = pinField.getText().trim();
 
-            if (accNum.isEmpty() || depositStr.isEmpty()) {
+            if (accNum.isEmpty() || depositStr.isEmpty() || pin.isEmpty()) {
                 showAlert("Missing Data", "Please fill all fields.", true);
+                return;
+            }
+            if (!pin.matches("\\d{4}")) {
+                showAlert("Invalid PIN", "PIN must be exactly 4 digits.", true);
+                return;
+            }
+
+            double deposit;
+            try {
+                deposit = Double.parseDouble(depositStr);
+            } catch (NumberFormatException e) {
+                showAlert("Invalid Amount", "Please enter a valid number.", true);
                 return;
             }
 
             Customer customer = findCustomer(accNum);
             if (customer == null) {
-                showAlert("Not Found", "Customer not found.", true);
-                return;
+                customer = new Customer("New", "Customer", "Gaborone", accNum, pin);
+            } else {
+                if (customer.getPIN() == null || customer.getPIN().isEmpty()) {
+                    customer.setPIN(pin);
+                }
             }
 
             try {
-                double deposit = Double.parseDouble(depositStr);
                 controller.openAccount("Main Branch", customer, deposit);
-                showAlert("Success", "Investment account opened successfully!", false);
-                clearForm(accNumField, depositField);
-            } catch (NumberFormatException ex) {
-                showAlert("Invalid Amount", "Please enter a valid number for deposit.", true);
+                showAlert("Success", "Investment account opened successfully! Customer can now log in with PIN.", false);
+                clearForm(accNumField, depositField, pinField);
             } catch (IllegalArgumentException ex) {
                 showAlert("Error", ex.getMessage(), true);
             }
@@ -74,14 +83,14 @@ public class OpenInvestmentAccountScene {
                 title,
                 new Label("Customer Account #:"), accNumField,
                 new Label("Initial Deposit:"), depositField,
+                new Label("Set Customer PIN:"), pinField,
                 openBtn
         );
 
-        Scene scene = new Scene(root, 450, 350);
+        Scene scene = new Scene(root, 450, 400);
         scene.getStylesheets().add("/styles.css");
         stage.setScene(scene);
         stage.setTitle("Open Investment Account");
-        stage.setResizable(false);
         stage.show();
     }
 
