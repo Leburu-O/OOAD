@@ -12,9 +12,9 @@ import javafx.stage.Stage;
 import java.util.List;
 
 public class OpenInvestmentAccountScene {
-    private Stage stage = new Stage();
-    private List<Customer> customers;
-    private OpenInvestmentAccountController controller;
+    private final Stage stage = new Stage();
+    private final List<Customer> customers;
+    private final OpenInvestmentAccountController controller;
 
     public OpenInvestmentAccountScene(List<Customer> customers, BankTeller bankTeller) {
         this.customers = customers;
@@ -39,7 +39,7 @@ public class OpenInvestmentAccountScene {
         pinField.setPromptText("Set 4-digit PIN for customer");
 
         Button openBtn = new Button("Open Account");
-        openBtn.setOnAction(e -> {
+        openBtn.setOnAction(e -> {  // <-- 'e' is ActionEvent here
             String accNum = accNumField.getText().trim();
             String depositStr = depositField.getText().trim();
             String pin = pinField.getText().trim();
@@ -56,7 +56,7 @@ public class OpenInvestmentAccountScene {
             double deposit;
             try {
                 deposit = Double.parseDouble(depositStr);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException ex) {  // <-- Changed 'e' to 'ex'
                 showAlert("Invalid Amount", "Please enter a valid number.", true);
                 return;
             }
