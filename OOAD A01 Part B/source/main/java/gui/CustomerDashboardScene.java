@@ -11,7 +11,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 public class CustomerDashboardScene {
-    private Stage stage = new Stage();
+    public Stage stage = new Stage();
     private ComboBox<Account> accountCombo;
     private ListView<String> historyView;
     private TransactionController txController;

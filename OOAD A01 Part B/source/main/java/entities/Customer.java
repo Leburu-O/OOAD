@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Customer {
-    private final String firstName;
-    private final String surname;
-    private final String address;
-    private final String accountNumber;
+    private String firstName;
+    private String surname;
+    private String address;
+    private String accountNumber;
     private String pin;
-    private final List<Account> accounts;
+    private List<Account> accounts;
 
     // Constructor
     public Customer(String firstName, String surname, String address, String accountNumber, String pin) {
