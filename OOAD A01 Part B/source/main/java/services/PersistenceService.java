@@ -153,7 +153,7 @@ public class PersistenceService {
 
     private void saveAccount(Account account, String customerAccNum, Connection conn) {
         String sql = """
-            INSERT OR REPLACE INTO accounts 
+            INSERT OR REPLACE INTO accounts
             (accountNumber, balance, branch, customerAccountNumber, type, companyAccount, employerName, employerAddress)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """;
