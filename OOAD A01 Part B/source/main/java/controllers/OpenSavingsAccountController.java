@@ -4,29 +4,27 @@ package controllers;
 import entities.Customer;
 import entities.SavingsAccount;
 import services.BankTeller;
+import services.PersistenceService;
 
-/**
- * Controller for opening a Savings Account.
- * Determines interest rate based on customer type: Individual or Company.
- */
 public class OpenSavingsAccountController {
 
     private final BankTeller bankTeller;
+    private final PersistenceService persistenceService = new PersistenceService();
 
     public OpenSavingsAccountController(BankTeller bankTeller) {
         this.bankTeller = bankTeller;
     }
 
     /**
-     * Opens a Savings Account for the customer.
-     * @param branch Bank branch
-     * @param customer Customer opening the account
-     * @param isCompany True if company account, false for individual
-     * @return Newly created SavingsAccount
+     * Opens a Savings Account for the customer and saves it to the database.
      */
     public SavingsAccount openAccount(String branch, Customer customer, boolean isCompany) {
         SavingsAccount account = bankTeller.openSavingsAccount(branch, customer, isCompany);
         customer.addAccount(account);
+
+        // ✅ Save customer and all accounts to database
+        persistenceService.saveCustomer(customer);
+
         return account;
     }
 }
