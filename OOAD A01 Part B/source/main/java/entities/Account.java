@@ -65,8 +65,8 @@ public abstract class Account {
     public List<Transaction> getTransactionHistory() { return transactionHistory; }
 
     // Setters (for DB loading)
-    protected void setBalance(double balance) { this.balance = balance; }
-    protected void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
+    public void setBalance(double balance) { this.balance = balance; }
+    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
 
     @Override
     public String toString() {
