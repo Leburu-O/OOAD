@@ -15,16 +15,15 @@ public class PersistenceService {
 
     /**
      * Loads all customers and their accounts from the database.
-     * @return List of loaded customers
      */
     public List<Customer> loadAllCustomers() {
         List<Customer> customers = new ArrayList<>();
         customerCache.clear();
 
-        // Load all customers first
+        // Load customers
         loadCustomersFromDB(customers);
 
-        // Then load all accounts and link them to customers
+        // Load accounts and link to customers
         loadAccountsAndTransactions();
 
         return customers;
@@ -117,7 +116,6 @@ public class PersistenceService {
                             rs.getDouble("amount"),
                             rs.getDouble("balanceAfter")
                     );
-                    // Note: Timestamp can be added if needed
                     account.getTransactionHistory().add(t);
                 }
             }
@@ -127,7 +125,31 @@ public class PersistenceService {
     }
 
     /**
-     * Saves a single customer and all their accounts to the database.
+     * Saves a single transaction to the database immediately.
+     */
+    public void saveTransaction(Transaction transaction, String accountNumber) {
+        String sql = """
+            INSERT INTO transactions (type, amount, balanceAfter, timestamp, accountNumber)
+            VALUES (?, ?, ?, ?, ?)
+            """;
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, transaction.getType());
+            pstmt.setDouble(2, transaction.getAmount());
+            pstmt.setDouble(3, transaction.getBalanceAfter());
+            pstmt.setString(4, transaction.getTimestamp().toString());
+            pstmt.setString(5, accountNumber);
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to save transaction: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Saves a customer and all their accounts (but not individual transactions — those are saved immediately).
      */
     public void saveCustomer(Customer customer) {
         String sql = "INSERT OR REPLACE INTO customers (accountNumber, firstName, surname, address, pin) VALUES (?, ?, ?, ?, ?)";
@@ -141,76 +163,13 @@ public class PersistenceService {
             pstmt.setString(5, customer.getPIN());
             pstmt.executeUpdate();
 
-            // Save all accounts
-            for (Account acc : customer.getAccounts()) {
-                saveAccount(acc, customer.getAccountNumber(), conn);
-            }
-
         } catch (SQLException e) {
             System.err.println("❌ Failed to save customer: " + e.getMessage());
         }
     }
 
-    private void saveAccount(Account account, String customerAccNum, Connection conn) {
-        String sql = """
-            INSERT OR REPLACE INTO accounts
-            (accountNumber, balance, branch, customerAccountNumber, type, companyAccount, employerName, employerAddress)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """;
-
-        boolean isCompany = false;
-        String employerName = null;
-        String employerAddress = null;
-
-        if (account instanceof SavingsAccount sa) {
-            isCompany = sa.isCompanyAccount();
-        } else if (account instanceof ChequeAccount ca) {
-            employerName = ca.getEmployerName();
-            employerAddress = ca.getEmployerAddress();
-        }
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, account.getAccountNumber());
-            pstmt.setDouble(2, account.getBalance());
-            pstmt.setString(3, account.getBranch());
-            pstmt.setString(4, customerAccNum);
-            pstmt.setString(5, account.getClass().getSimpleName());
-            pstmt.setBoolean(6, isCompany);
-            pstmt.setString(7, employerName);
-            pstmt.setString(8, employerAddress);
-            pstmt.executeUpdate();
-
-            // Save all transactions for this account
-            saveTransactionsForAccount(account, conn);
-
-        } catch (SQLException e) {
-            System.err.println("❌ Failed to save account: " + e.getMessage());
-        }
-    }
-
-    private void saveTransactionsForAccount(Account account, Connection conn) {
-        String sql = """
-            INSERT INTO transactions (type, amount, balanceAfter, timestamp, accountNumber)
-            VALUES (?, ?, ?, ?, ?)
-            """;
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            for (Transaction t : account.getTransactionHistory()) {
-                pstmt.setString(1, t.getType());
-                pstmt.setDouble(2, t.getAmount());
-                pstmt.setDouble(3, t.getBalanceAfter());
-                pstmt.setString(4, t.getTimestamp().toString());
-                pstmt.setString(5, account.getAccountNumber());
-                pstmt.addBatch(); // Use batch for efficiency
-            }
-            pstmt.executeBatch();
-        } catch (SQLException e) {
-            System.err.println("❌ Failed to save transactions: " + e.getMessage());
-        }
-    }
-
     /**
-     * Saves all customers and their data to the database.
+     * Saves all customers at shutdown.
      */
     public void saveAllCustomers(List<Customer> customers) {
         for (Customer c : customers) {

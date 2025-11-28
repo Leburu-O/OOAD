@@ -1,38 +1,37 @@
+// entities/InvestmentAccount.java
 package entities;
+
+import services.PersistenceService;
 
 public class InvestmentAccount extends Account {
     public static final double INTEREST_RATE = 0.05; // 5% monthly
-    public static final double MIN_DEPOSIT = 500.00;
 
     public InvestmentAccount(String branch, Customer customer, double initialDeposit) {
         super(branch, customer);
-        if (initialDeposit < MIN_DEPOSIT) {
-            throw new IllegalArgumentException(
-                "Investment account requires minimum deposit of BWP" + MIN_DEPOSIT);
+        if (initialDeposit < 500.0) {
+            throw new IllegalArgumentException("Investment account requires minimum deposit of BWP 500.00.");
         }
-        deposit(initialDeposit);
+        deposit(initialDeposit); // Uses safe deposit → auto-saved
     }
 
     @Override
     public void withdraw(double amount) {
-        if (amount <= 0) {
-            System.out.println("Invalid withdrawal amount.");
-            return;
-        }
-        if (amount > balance) {
-            System.out.println("Insufficient funds.");
-            return;
-        }
+        if (amount <= 0) throw new IllegalArgumentException("Amount must be positive.");
+        if (amount > balance) throw new IllegalStateException("Insufficient funds.");
         balance -= amount;
         Transaction t = new Transaction("Withdrawal", amount, balance);
         transactionHistory.add(t);
-        System.out.printf("Withdrew %.2f BWP. New balance: %.2f BWP\n", amount, balance);
+
+        // ✅ Save withdrawal immediately
+        new PersistenceService().saveTransaction(t, this.accountNumber);
     }
 
     @Override
     public double applyInterest() {
         double interest = balance * INTEREST_RATE;
-        logInterest(interest);
+        if (interest > 0) {
+            logInterest(interest);
+        }
         return interest;
     }
 }

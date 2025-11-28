@@ -1,4 +1,7 @@
+// entities/ChequeAccount.java
 package entities;
+
+import services.PersistenceService;
 
 public class ChequeAccount extends Account {
     private String employerName;
@@ -12,27 +15,22 @@ public class ChequeAccount extends Account {
 
     @Override
     public void withdraw(double amount) {
-        if (amount <= 0) {
-            System.out.println("Invalid withdrawal amount.");
-            return;
-        }
-        if (amount > balance) {
-            System.out.println("Insufficient funds.");
-            return;
-        }
+        if (amount <= 0) throw new IllegalArgumentException("Amount must be positive.");
+        if (amount > balance) throw new IllegalStateException("Insufficient funds.");
+
         balance -= amount;
         Transaction t = new Transaction("Withdrawal", amount, balance);
         transactionHistory.add(t);
-        System.out.printf("Withdrew %.2f BWP. New balance: %.2f BWP\n", amount, balance);
+
+        // ✅ Save withdrawal immediately
+        new PersistenceService().saveTransaction(t, this.accountNumber);
     }
 
     @Override
     public double applyInterest() {
-        // No interest
-        return 0.0;
+        return 0.0; // No interest
     }
 
-    // Getters
     public String getEmployerName() { return employerName; }
     public String getEmployerAddress() { return employerAddress; }
 }

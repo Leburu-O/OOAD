@@ -14,17 +14,6 @@ public class TransactionController {
         this.customer = customer;
     }
 
-    /**
-     * Gets all accounts owned by the customer.
-     * @return List of accounts (safe for GUI binding)
-     */
-    public List<Account> getAccounts() {
-        return new ArrayList<>(customer.getAccounts());
-    }
-
-    /**
-     * Deposits funds into the specified account.
-     */
     public void deposit(Account account, double amount) {
         if (amount <= 0) {
             throw new IllegalArgumentException("Deposit amount must be positive.");
@@ -32,9 +21,6 @@ public class TransactionController {
         account.deposit(amount);
     }
 
-    /**
-     * Withdraws funds from the specified account if allowed.
-     */
     public void withdraw(Account account, double amount) {
         if (account.getClass().getSimpleName().contains("Savings")) {
             throw new IllegalStateException("Withdrawal not allowed from Savings Account.");
@@ -46,5 +32,9 @@ public class TransactionController {
             throw new IllegalStateException("Insufficient funds.");
         }
         account.withdraw(amount);
+    }
+
+    public List<Account> getAccounts() {
+        return new ArrayList<>(customer.getAccounts());
     }
 }
